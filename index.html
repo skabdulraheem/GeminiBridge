@@ -68,7 +68,7 @@
 <body>
 
 <div class="chat-box">
-    <div class="chat-header">🤖 Gemini AI ChatBot</div>
+    <div class="chat-header">🤖 Local AI ChatBot (Ollama)</div>
 
     <div class="chat-body" id="chatBody">
         <div class="message bot">Hello! Type a message.</div>
@@ -106,67 +106,63 @@ async function sendMessage() {
 
     // -------- SOCIAL MEDIA COMMANDS --------
 
-    if (lower === "open google") {
-        window.open("https://www.google.com", "_blank");
+    const sites = {
+        "open google": "https://google.com",
+        "open youtube": "https://youtube.com",
+        "open instagram": "https://instagram.com",
+        "open facebook": "https://facebook.com",
+        "open github": "https://github.com",
+        "open amazon": "https://amazon.com",
+        "open flipkart": "https://flipkart.com"
+    };
+
+    if (sites[lower]) {
+        window.open(sites[lower], "_blank");
         return;
     }
 
-    if (lower === "open youtube") {
-        window.open("https://www.youtube.com", "_blank");
-        return;
-    }
-
-    if (lower === "open instagram") {
-        window.open("https://www.instagram.com", "_blank");
-        return;
-    }
-
-    if (lower === "open facebook") {
-        window.open("https://www.facebook.com", "_blank");
-        return;
-    }
-
-    if (lower === "open github") {
-        window.open("https://www.github.com", "_blank");
-        return;
-    }
-
-    if (lower === "open amazon") {
-        window.open("https://www.amazon.com", "_blank");
-        return;
-    }
-
-    if (lower === "open flipkart") {
-        window.open("https://www.flipkart.com", "_blank");
-        return;
-    }
-
-    // ----- Show Thinking Message -----
+    // ----- Thinking bubble -----
     let botDiv = document.createElement("div");
     botDiv.className = "message bot";
     botDiv.innerText = "Thinking...";
     chatBody.appendChild(botDiv);
-
     chatBody.scrollTop = chatBody.scrollHeight;
 
     try {
-        const response = await fetch("http://localhost:8080/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: message
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000); // 20s timeout
+
+        const response = await fetch(
+            "http://localhost:8080/api/ai/chat?prompt=" + encodeURIComponent(message),
+            { signal: controller.signal }
+        );
+
+        clearTimeout(timeout);
+
+        // Handle HTTP errors explicitly
+        if (!response.ok) {
+            const errText = await response.text();
+            botDiv.innerText = `Server error (${response.status}): ${errText}`;
+            return;
+        }
 
         const data = await response.text();
-        botDiv.innerText = data;
+        botDiv.innerText = data || "No response from AI.";
 
     } catch (error) {
-        botDiv.innerText = "Error connecting to backend.";
+        if (error.name === "AbortError") {
+            botDiv.innerText = "Request timed out (AI is slow locally).";
+        } else {
+            botDiv.innerText = "Cannot reach backend. Make sure:\n- Spring Boot is running\n- Ollama is running\n- Port is correct";
+        }
+
+        console.error("Chat error:", error);
+    }chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
+   
+
 
 </script>
-
 </body>
 </html>
