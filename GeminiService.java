@@ -1,6 +1,5 @@
 package com.SpringBoot_AI;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -9,85 +8,80 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @Service
-public class GeminiService {
+public class OllamaService {
 
-	@Value("${gemini.api.key}")
-	private String apiKey;
+	private static final String OLLAMA_URL = "http://localhost:11434/api/generate";
+	private static final String MODEL = "phi3";  // change if needed
 
-	private static final String API_BASE = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=";
+    private final HttpClient client = HttpClient.newHttpClient();
 
-	private final HttpClient client = HttpClient.newHttpClient();
+    // ---------------- NORMAL CHAT ----------------
 
-	// ---------------- NORMAL CHAT ----------------
+    public String getResponse(String prompt) throws Exception {
+        return callOllama(prompt);
+    }
 
-	public String getResponse(String prompt) throws Exception {
-		return callGemini(prompt);
-	}
+    // ---------------- SQL MODE ----------------
 
-	// ---------------- SQL MODE ----------------
+    public String generateSQL(String userRequest) throws Exception {
 
-	public String generateSQL(String userRequest) throws Exception {
+        String sqlPrompt = """
+                You are an expert MySQL query generator.
+                Convert the following request into a valid MySQL SELECT query.
+                Rules:
+                - Return ONLY the SQL query.
+                - No explanation.
+                - No markdown.
+                - Only SELECT statements allowed.
 
-		String sqlPrompt = """
-				You are an expert MySQL query generator.
-				Convert the following request into a valid MySQL SELECT query.
-				Rules:
-				- Return ONLY the SQL query.
-				- No explanation.
-				- No markdown.
-				- Only SELECT statements allowed.
+                Request: %s
+                """.formatted(userRequest);
 
-				Request: %s
-				""".formatted(userRequest);
+        return callOllama(sqlPrompt);
+    }
 
-		return callGemini(sqlPrompt);
-	}
+    // ---------------- COMMON OLLAMA CALL ----------------
 
-	// ---------------- COMMON GEMINI CALL ----------------
+    private String callOllama(String prompt) throws Exception {
 
-	private String callGemini(String prompt) throws Exception {
+        prompt = prompt.replace("\"", "\\\"");
 
-		if (apiKey == null || apiKey.isEmpty()) {
-			return "Error: Gemini API key not configured.";
-		}
+        String json = """
+                {
+                  "model": "%s",
+                  "prompt": "%s",
+                  "stream": false
+                }
+                """.formatted(MODEL, prompt);
 
-		prompt = prompt.replace("\"", "\\\"");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(OLLAMA_URL))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
 
-		String json = """
-				{
-				  "contents": [
-				    {
-				      "parts": [
-				        { "text": "%s" }
-				      ]
-				    }
-				  ]
-				}
-				""".formatted(prompt);
+        HttpResponse<String> response =
+                client.send(request, HttpResponse.BodyHandlers.ofString());
 
-		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(API_BASE + apiKey))
-				.header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
+        if (response.statusCode() != 200) {
+            return "Ollama Error: " + response.body();
+        }
 
-		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return extractText(response.body());
+    }
 
-		if (response.statusCode() != 200) {
-			return "API Error: " + response.body();
-		}
+    // ---------------- TEXT EXTRACTION ----------------
 
-		return extractText(response.body());
-	}
+    private String extractText(String body) {
 
-	// ---------------- TEXT EXTRACTION ----------------
+        // Ollama response contains: "response":"text here"
+        int start = body.indexOf("\"response\":\"") + 12;
+        int end = body.indexOf("\"", start);
 
-	private String extractText(String body) {
+        if (start > 11 && end > start) {
+            return body.substring(start, end).replace("\\n", "\n");
+        }
 
-		int start = body.indexOf("\"text\": \"") + 9;
-		int end = body.indexOf("\"", start);
-
-		if (start > 8 && end > start) {
-			return body.substring(start, end).replace("\\n", "\n");
-		}
-
-		return "Error: Could not extract text.";
-	}
+        return "Error: Could not extract text.";
+    }
 }
