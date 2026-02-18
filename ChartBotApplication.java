@@ -3,11 +3,10 @@ package com.SpringBoot_AI;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class ChartBotApplication {
+@SpringBootApplication(scanBasePackages = "com")
+public class DemoApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ChartBotApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
 }
