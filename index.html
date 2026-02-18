@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI ChatBot</title>
+    <meta charset="UTF-8">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg,#0d6efd,#6610f2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-box {
+            width: 500px;
+            height: 650px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .chat-header {
+            background: #0d6efd;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+        }
+
+        .user {
+            background: #0d6efd;
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot {
+            background: #e9ecef;
+        }
+
+        .chat-footer {
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-box">
+    <div class="chat-header">🤖 Gemini AI ChatBot</div>
+
+    <div class="chat-body" id="chatBody">
+        <div class="message bot">Hello! Type a message.</div>
+    </div>
+
+    <div class="chat-footer">
+        <div class="input-group">
+            <input type="text" id="userInput" class="form-control" placeholder="Type here...">
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+async function sendMessage() {
+
+    let input = document.getElementById("userInput");
+    let message = input.value.trim();
+
+    if (message === "") return;
+
+    let chatBody = document.getElementById("chatBody");
+
+    // ----- Add User Message -----
+    let userDiv = document.createElement("div");
+    userDiv.className = "message user";
+    userDiv.innerText = message;
+    chatBody.appendChild(userDiv);
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+    input.value = "";
+
+    let lower = message.toLowerCase();
+
+    // -------- SOCIAL MEDIA COMMANDS --------
+
+    if (lower === "open google") {
+        window.open("https://www.google.com", "_blank");
+        return;
+    }
+
+    if (lower === "open youtube") {
+        window.open("https://www.youtube.com", "_blank");
+        return;
+    }
+
+    if (lower === "open instagram") {
+        window.open("https://www.instagram.com", "_blank");
+        return;
+    }
+
+    if (lower === "open facebook") {
+        window.open("https://www.facebook.com", "_blank");
+        return;
+    }
+
+    if (lower === "open github") {
+        window.open("https://www.github.com", "_blank");
+        return;
+    }
+
+    if (lower === "open amazon") {
+        window.open("https://www.amazon.com", "_blank");
+        return;
+    }
+
+    if (lower === "open flipkart") {
+        window.open("https://www.flipkart.com", "_blank");
+        return;
+    }
+
+    // ----- Show Thinking Message -----
+    let botDiv = document.createElement("div");
+    botDiv.className = "message bot";
+    botDiv.innerText = "Thinking...";
+    chatBody.appendChild(botDiv);
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    try {
+        const response = await fetch("http://localhost:8080/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: message
+        });
+
+        const data = await response.text();
+        botDiv.innerText = data;
+
+    } catch (error) {
+        botDiv.innerText = "Error connecting to backend.";
+    }
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
