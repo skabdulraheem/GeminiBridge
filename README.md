@@ -1,110 +1,236 @@
-# GeminiBridge
+🤖 Local AI ChatBot (Spring Boot + Ollama)
 
-🚀 Spring Boot + Gemini AI Service
+A simple full-stack AI chatbot built using Spring Boot and Ollama (local AI models).
+This project runs AI completely on your machine without using paid cloud APIs.
 
-A lightweight Spring Boot service that integrates Google Gemini AI using pure Java (no external AI SDKs).
-Supports:
+It supports:
 
-Normal conversational AI responses
+AI chat using local LLMs
 
-AI-generated MySQL SELECT queries
+Browser commands (open Google, Instagram, etc.)
 
-This project is ideal for learning AI integration in Java backend without heavy frameworks.
+Fully offline AI capability
 
-🧠 Features
-1. Normal AI Chat
+🚀 Features
 
-Send any prompt → Get AI-generated response.
+Local AI using Ollama (no API cost)
 
-Example
+Spring Boot backend
 
-Input: Explain REST API
-Output: Gemini explanation
+Simple web UI chatbot
 
-2. SQL Generator Mode
+Works offline after model download
 
-Converts natural language → MySQL SELECT query.
+Supports quick commands like:
 
-Example
+open google
 
-Input: Get all users registered today
-Output: SELECT * FROM users WHERE DATE(created_at) = CURDATE();
+open instagram
 
+open youtube
 
-⚠️ Restricted to SELECT queries for safety.
+open github
 
-🛠️ Technologies Used
-Layer	Technology
-Backend	Java 17+
-Framework	Spring Boot
-AI Provider	Google Gemini API
-HTTP Client	Java HttpClient (no third-party libs)
-Build Tool	Maven / Gradle
-Config	application.properties
-📁 Project Structure
-com.SpringBoot_AI
- └── GeminiService.java
-
-Core Responsibilities
-Class	Purpose
-GeminiService	Handles AI communication
-callGemini()	Makes API request
-generateSQL()	SQL-only prompt engineering
-extractText()	Parses Gemini response
-⚙️ Prerequisites
+🛠 Tech Stack
+Backend
 
 Java 17+
 
-Maven or Gradle
+Spring Boot
 
-Google Gemini API Key
+REST API
 
-🔑 Getting Gemini API Key
+AI Engine
 
-Go to: https://makersuite.google.com/app/apikey
+Ollama (local LLM runtime)
 
-Generate API key
+Models supported:
 
-Copy it
+phi3 (recommended fast)
 
-⚙️ Configuration
+llama3 (better quality but slower)
 
-Add this in:
+Frontend
 
-application.properties
-gemini.api.key=YOUR_API_KEY_HERE
+HTML + CSS + JavaScript
 
-▶️ How to Run
-1️⃣ Clone Repo
-git clone https://github.com/your-username/springboot-gemini-ai.git
-cd springboot-gemini-ai
+Bootstrap UI
 
-2️⃣ Build Project
+📦 Requirements
+
+Before running this project, install:
+
+Java 17 or above
+
 Maven
-mvn clean install
 
-Gradle
-gradle build
+Ollama
 
-3️⃣ Run Application
+⚙️ Ollama Installation
+Step 1 — Download Ollama
+
+Download from: https://ollama.com/download
+
+Install normally like any software.
+
+Step 2 — Install a Model
+
+Recommended fast model:
+
+ollama pull phi3
+
+Optional higher quality model:
+
+ollama pull llama3
+▶️ How to Run the Project
+Step 1 — Start Ollama (IMPORTANT)
+
+Open terminal and run:
+
+ollama run phi3
+
+⚠️ This terminal must stay running in the background. If you close it → AI stops working.
+
+Step 2 — Start Spring Boot Backend
+
+Go to project folder and run:
+
 mvn spring-boot:run
 
+Wait until you see:
 
-OR
+Tomcat started on port 8080
+Step 3 — Open the App
 
-java -jar target/app.jar
+Open browser:
 
-🔌 How It Works Internally
-Step-by-step flow
+http://localhost:8080
 
-User sends prompt
+Now you can chat with your local AI.
 
-Service builds Gemini JSON payload
+💬 Example Commands
+Normal AI
 
-HTTP POST → Google Gemini API
+explain sql
 
-AI response received
+what is java
 
-Text extracted manually
+tell me about spring boot
 
-Returned to controller
+Browser Commands
+
+These open websites instantly:
+
+open google
+
+open instagram
+
+open youtube
+
+open facebook
+
+open github
+
+open amazon
+
+⏱ Why Responses Can Be Slow
+
+This project uses local AI, not cloud AI. So responses may take time.
+
+Reasons for delay:
+
+AI runs on your CPU
+
+No cloud GPU acceleration
+
+Large models need more processing time
+
+First request is always slower (model warm-up)
+
+Typical speeds:
+
+Cloud AI → 1–2 seconds
+
+Local AI → 5–30 seconds (depends on laptop)
+
+⚡ How to Reduce Delay
+
+Use smaller model like phi3
+
+Keep Ollama running (avoid cold start)
+
+Send shorter prompts
+
+Use system with more RAM for faster results
+
+⚠️ Important Notes
+
+Ollama must run in background terminal
+
+Spring Boot must also be running
+
+If either stops → chatbot will not respond
+
+Both must run together:
+
+Ollama terminal
+
+Spring Boot terminal
+
+🧪 Troubleshooting
+Backend not reachable
+
+Make sure Spring Boot is running
+
+Check http://localhost:8080
+
+AI not responding
+
+Ensure Ollama is running
+
+Check http://localhost:11434
+
+Model not found error
+
+Install model again:
+
+ollama pull phi3
+🎯 Project Goal
+
+This project demonstrates:
+
+Local AI integration with Java
+
+Full offline chatbot architecture
+
+Spring Boot + LLM integration
+
+Great for:
+
+AI portfolio projects
+
+Learning local LLMs
+
+Building privacy-first AI apps
+
+📌 Future Improvements
+
+Streaming responses (ChatGPT style)
+
+Chat history memory
+
+Hybrid AI (local + cloud)
+
+Docker deployment
+
+Authentication
+
+👨‍💻 Author
+
+Built as a learning project to understand:
+
+AI + Java integration
+
+Local LLM architecture
+
+Full-stack AI development
