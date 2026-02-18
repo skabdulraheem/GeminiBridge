@@ -1,21 +1,28 @@
 package com.SpringBoot_AI;
-import com.SpringBoot_AI.GeminiService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin("*")
 @RestController
-@CrossOrigin
-@RequestMapping("/api")
-public class ChatController {
+@RequestMapping("/api/ai")
+public class OllamaController {
 
-    private final GeminiService geminiService;
+    private final OllamaService service;
 
-    public ChatController(GeminiService geminiService) {
-        this.geminiService = geminiService;
+    public OllamaController(OllamaService service) {
+        this.service = service;
     }
 
-    @PostMapping("/chat")
-    public String chat(@RequestBody String message) throws Exception {
-        return geminiService.getResponse(message);
+    @GetMapping("/chat")
+    public String chat(@RequestParam String prompt) throws Exception {
+        return service.getResponse(prompt);
+    }
+
+    @GetMapping("/sql")
+    public String sql(@RequestParam String prompt) throws Exception {
+        return service.generateSQL(prompt);
     }
 }
-
